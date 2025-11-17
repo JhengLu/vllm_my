@@ -4,6 +4,10 @@
 import time
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, Optional
+from datetime import datetime
+import json
+import os
+from pathlib import Path
 
 from vllm.v1.spec_decode.metrics import SpecDecodingStats
 
@@ -195,6 +199,29 @@ class IterationStats:
                                  inference_time=inference_time,
                                  decode_time=decode_time,
                                  mean_time_per_output_token=mean_time_per_output_token)
+        
+        # Log detailed request stats to file
+        log_file_path = Path(__file__).parents[4] / "vllm_log" / "profiler_output" / "vllm_request_stats.log"
+        log_entry = {
+            "timestamp": datetime.now().isoformat(),
+            "finish_reason": str(finish_reason),
+            "e2e_latency": e2e_latency,
+            "num_prompt_tokens": num_prompt_tokens,
+            "num_generation_tokens": req_stats.num_generation_tokens,
+            "max_tokens_param": max_tokens_param,
+            "queued_time": queued_time,
+            "prefill_time": prefill_time,
+            "inference_time": inference_time,
+            "decode_time": decode_time,
+            "mean_time_per_output_token": mean_time_per_output_token
+        }
+
+        try:
+            with open(log_file_path, "a") as log_file:
+                log_file.write(json.dumps(log_entry) + "\n")
+        except Exception as e:
+            # Silently ignore logging errors to not break the main flow
+            pass
         self.finished_requests.append(finished_req)
 
 

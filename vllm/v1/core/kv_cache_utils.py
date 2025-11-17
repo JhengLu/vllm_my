@@ -103,7 +103,7 @@ class PrefixCachingMetrics:
             Defaults to 1000.
     """
 
-    def __init__(self, max_recent_requests: int = 1000):
+    def __init__(self, max_recent_requests: int = 1):
         self.max_recent_requests = max_recent_requests
         # The current aggregated values.
         self.aggregated_requests = 0
